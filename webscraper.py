@@ -19,6 +19,8 @@ def get_text(text):
 # Load progress from cache file if it exists
 cache_file = "progress_cache.json"
 
+output_file = "output.json"
+
 try:
     with open(cache_file, "r") as f:
         progress_data = json.load(f)
@@ -26,11 +28,19 @@ try:
 except FileNotFoundError:
     pagecount = 1
 
-listings = []
+
+
+
 timeout = 10
 max_retries = 3  # Number of retries
 retry_delay = 2  # Seconds to wait before retrying
 
+
+try:
+    with open(output_file, "r") as f:
+        listings = json.load(f)
+except FileNotFoundError:
+    listings = []
 
 
 while True:
@@ -38,6 +48,8 @@ while True:
     while retries < max_retries:
         try:
             print('PAGECOUNT: ', pagecount)
+
+            
             
             print("LOLLL: " + "https://www.lamudi.com.ph/rent/?sorting=newest&page=" + str(pagecount))
             response = urllib.request.urlopen("https://www.lamudi.com.ph/rent/?sorting=price-low&page=" + str(pagecount), timeout = timeout)
@@ -72,7 +84,13 @@ while True:
                     print(f"{key}: {value}")       
                 print('----------------------------')
             pagecount += 1
-            # Save progress to cache file
+
+             # Write the updated data back to the JSON file
+            with open(output_file, "w") as f:
+                json.dump(listings, f, indent=4)
+
+                
+                # Save progress to cache file
             progress_data = {"pagecount": pagecount}
             with open(cache_file, "w") as f:
                 json.dump(progress_data, f)
